@@ -1,0 +1,280 @@
+test Axios
+
+Что тестируем:
+- axios- вызывается, но не нативный(этого избегаем), а его mock.
+- mock аксиоса возвращает промис
+- в результате изменяется data().
+
+
+
+
+A. Создаем заглушку для axios.
+https://jestjs.io/docs/en/mock-functions (!)
+
+//код
+    methods: {
+       async getNotifications() {
+        let response = await axios.get('/notifications.json')
+        // this.notifications = response.data.data
+        //выключаем, т.к. структура "ответа" нашего фак-промиса "jest.mock('axios', ..)" пока написана произвольно, без ".data.data".
+
+       console.log('response', response) //=>> response { name: 'kola' } в консоле WStorm'a
+      }
+    },
+    mounted() {
+      this.getNotifications()
+    }
+
+
+//тест
+import AppNotifications from '../AppNotifications'
+
+jest.mock('axios', () => {            //заглушка для axios.
+  return {
+    get: () => Promise.resolve({
+      name: 'kola'   //NB!- если внутри jest.mock используется переменная, то она должна начинаться с mock_ (!).
+    })
+  }
+})
+
+
+describe('AppNotifications', () => {
+  it('renders a list of notifications', () => {
+    let wrapper = mount(AppNotifications)
+  })
+})
+
+==>>
+при запуске теста 'поднимается' тестируемый компонент,
+в нем перетирается axios за счет заглушки,
+и в консоле мы получаем
+
+ response { name: 'kola' }
+
+т.е. создали эфективную заглушку для axios.
+
+
+
+
+
+B. 
+Тестируем компонент,
+дата аксиоса поступает из заглушки аксиоса.
+Тестируемый компонент- без правок.
+
+(Тестирование асинхронной логики-
+https://vue-test-utils.vuejs.org/ru/guides/testing-async-components.html)
+
+//тест
+import {mount, shallowMount, RouterLinkStub} from '@vue/test-utils'
+import AppNotifications from '../AppNotifications'
+
+jest.mock('axios', () => {
+  return {
+    get: () => Promise.resolve({
+      data: {
+        data: [                    //<<== структура получаемого по axios ответа.
+          {
+            id: 1,
+            body: 'First'
+          },
+          {
+            id: 2,
+            body: 'Second'
+          }
+        ]
+      }
+    }),
+    post() {                       //POST-request.
+      return Promise.resolve()
+    }
+  }
+})
+
+ИЛИ
+jest.mock('axios', () => {
+  return {
+    get() {
+      return Promise.resolve({
+        data: [
+         .....
+        ]
+      })
+    }
+  }
+})
+
+
+describe('AppNotifications', () => {
+  it('renders a list of notifications', (done) => {    //done - вставить обязательно(!)
+    let wrapper = mount(AppNotifications)
+
+    setTimeout(() => {
+      console.log('wrapper.html()-5 = ', wrapper.html())
+
+      let items = wrapper.findAll('li')
+      expect(items.at(0).text()).toContain('First')
+      expect(items.at(1).text()).toContain('Second')
+
+      done()        //обязательно(!)
+    }, 0)
+
+
+    //wrapper.vm.$nextTick(() => {               //Здесь- не срабатывает, но в setInterval.md - СРАБАТЫВАЕТ(!) 
+    //   console.log('wrapper.html() = ', wrapper.html())
+    //   done()
+    //})
+
+
+//NB!
+//$nextTick(() срабатывает только тогда, 
+//когда мы принудительно запускаем getNotifications(), содержащую аксиос, "по клику",
+//wrapper.find('a').trigger('click') 
+
+//, а не тестируем аксиос, запускаемый by mounted().
+
+//ИНАЧЕ надо использовать setTimeout().
+
+//См. Тестирование асинхронной логики-
+//https://vue-test-utils.vuejs.org/ru/guides/testing-async-components.html
+
+  })
+})
+
+
+
+
+.............................
+
+4/тестируем асинхронную функцию (семинар Vue-school).
+
+А. Код
+methods: {
+    async fetchData() {
+      const response = await fetch("GO")
+      this.data = response.data
+    }
+  }
+  
+
+Б. тестируем fetchData()
+
+test('fetchData', async () => {
+    const fetchMock = jest.fn().mockResolvedValue('DATA')
+    // or:  const jsonMock = jest.fn().mockImplementation(() => Promise.resolve('DATA'));
+
+    // const jsonMock = jest.fn().mockImplementation(() => 'DATA')
+    // or:  const jsonMock = jest.fn(() => 'DATA')
+   
+    window.fetch = fetchMock                           //заменили нативный fetch() by подставой
+    
+    await wrapper.vm.fetchData()                       //запустили проверяемую функцию
+    expect(wrapper.vm.data).toBe('DATA')               //получили правильный результат
+})
+
+
+.................................
+обманка для аксиоса
+
+1.
+// test/__mocks__/axios.js
+
+module.exports = {
+  get: jest.fn(() => Promise.resolve({ data: [3] }))
+}
+
+Jest автоматически(!) применит подстановочный объект во всех наших тестах.
+Имя модуля должно совпадать с именем файла(!).
+
+
+
+
+2. или непосредственно в тесте
+NB! Заявленный jest.mock() хоть в конце кода- всегда "поднимается" в его начало.
+
+jest.mock('axios', () => ({
+  get: jest.fn(() => Promise.resolve({ data: 3 }))
+}))
+
+expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=an')
+
+
+
+3.NB!
+Вызванность обманки аксиоса продолжает работать и в нижеследующих тестах!
+Поэтому, что бы это обнулить, надо сделать
+
+jest.clearAllMocks()
+
+а еще лучше делать
+
+beforeEach(() => {
+  jest.resetModules();
+  jest.clearAllMocks();
+})
+
+
+
+
+
+
+
+...................................
+КОД
+
+  methods: {
+    onSubmit(value) {
+      return axios.get('https://jsonplaceholder.typicode.com/posts?q=' + value)
+        .then(results => {
+        this.results = results.data
+        return results
+      })
+    }
+  }
+
+
+
+ТЕСТ
+
+jest.mock('axios', () => ({                             //обманка аксиоса
+  get: jest.fn(() => Promise.resolve({ data: 3 }))
+}))
+
+import { shallowMount } from '@vue/test-utils'
+import Form from '../src/components/Form'
+import axios from 'axios'
+
+describe('Form.test.js', () => {
+
+  it('Calls axios', async () => {
+    let wrapper = shallowMount(Form)
+
+    const result = await wrapper.vm.onSubmit(99)   //а вызывается- с pl равным 99. ))
+
+    expect(result).toEqual({ data: 3 })          //3- берется из jest.mock('axios')...
+    expect(wrapper.vm.results).toEqual(3)
+
+    expect(axios.get).toBeCalledWith('https://jsonplaceholder.typicode.com/posts?q=99')
+  })
+
+Т.е. здесь:
+- onSubmit() запускаем с pl=99, и поэтому аксиос в нем запускается хвостиком "=99".
+- обманка аксиоса по-умолчанию дает нам "3",поэтому onSubmit() ретернет тоже 3, и wrapper.vm.results будет тоже 3.
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

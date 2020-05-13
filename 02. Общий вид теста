@@ -1,0 +1,74 @@
+Общий вид теста
+
+1. тесты кладем в папку __test__  рядом с тестируемым компонентом
+__tests__/Home.spec.js
+
+Папка __snapshots__ будет создаваться рядом с тест-файлом, т.е. в папке __tests__.
+
+2. имя файла- по имени компонента
+component.shec.js
+
+
+3.
+__tests__/__mocks__/axios.js
+
+В папке __mocks__ кладем файлы с mock-подменками, Нр- подменка аксиоса.
+Jest автоматически(!) применит подстановочный объект во всех наших тестах, без какого-либо импорта в файле теста.
+Имя модуля должно совпадать с именем файла(!).
+
+module.exports = {
+  get: jest.fn(() => Promise.resolve({ data: [3] }))
+}
+
+
+4. Пример теста.
+__tests__/component.shec.js
+
+import {mount, createLocalVue} from '@vue/test-utils'
+import Component from '../Component'
+
+
+describe('Properties', () => {
+ describe('Block_1', () => {
+
+  beforeEach(() => {     //это будет запускаться перед каждым тестом
+   ...
+  })
+
+  it('test_1', () => {
+
+    let wrapper = mount(Notifications, {    //поднимаем компонент      
+      propsData: {
+        item: {
+          id: 1,
+          title: 'One'
+        }
+      }
+    })
+
+    wrapper.find('a').trigger('click')      //тестируем
+    expect(wrapper.html()).toContain('Hello')
+  })
+
+ })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

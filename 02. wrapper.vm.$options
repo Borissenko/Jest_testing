@@ -1,0 +1,5 @@
+wrapper.vm.$options
+
+-все о поднятом компоненте можно почерпнуть в wrapper.vm.$options
+
+wrapper.vm.$options.props.text.type   //тип поступающей в пропс переменной

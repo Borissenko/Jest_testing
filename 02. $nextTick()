@@ -1,0 +1,23 @@
+
+
+
+
+
+
+.....................
+
+    it('изменяем inputValue by vm', done => {    //см. https://jestjs.io/docs/en/asynchronous.html
+      let  spy = jest.spyOn(console, 'log')      //задаем шпиона на console.log
+
+      let wrapper = shallowMount(Form)               //поднимаем компонент
+      wrapper.vm.inputValue = 'foo'       //(!)изменяем inputValue непосредственным образом by vm.
+
+      wrapper.vm.$nextTick(() => {
+        expect(spy).toBeCalled()
+        done()
+      })
+
+      // spy.mockClear()   //НЕ нужен!
+
+    })
+
