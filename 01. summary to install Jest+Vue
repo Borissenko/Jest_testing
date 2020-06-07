@@ -80,7 +80,7 @@ module.exports = {
 
 
 C. Проверка работоспособности
-//specs/test.spec.js
+//specs/HelloWorld.spec.js
 
 describe('my_test', () => {
   it('should ', () => {
@@ -90,7 +90,7 @@ describe('my_test', () => {
 
 
 import { mount } from '@vue/test-utils'
-import TestComponent from '../src/components/HelloWorld.vue'
+import TestComponent from '../HelloWorld.vue'
 
 test('mount a vue component', () => {
   const wrapper = mount(TestComponent, {
@@ -104,7 +104,9 @@ test('mount a vue component', () => {
 
 
 в консоле набираем:
-jest specs/test.spec.js
+jest specs/HelloWorld.spec.js
+или 
+jest Hell                 //запускаются ВСЕ тесты, содержащие в своем названии "Hell".
 
 
 

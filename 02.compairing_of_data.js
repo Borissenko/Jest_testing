@@ -42,6 +42,9 @@ expect(['аа', 'бб']).not.toEqual(expect.arrayContaining(arr))  //arr не д
 //верифицируем type_of
 expect(33).toEqual(expect.any(Number))  //expect.any(Function), expect.any(Array)
 
+-все о поднятом компоненте можно почерпнуть в wrapper.vm.$options
+wrapper.vm.$options.props.text.type   //тип поступающей в пропс переменной
+
 
 
 //верифицируем обект с определенными полями, но значения полей произвольные
