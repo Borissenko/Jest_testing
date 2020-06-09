@@ -2,13 +2,11 @@
 в который опускается поток by v-model'ом из родителя
 и эмитится луч вверх при событии @input.
 
-
 //Родитель
   <div>
     <AppFormInput v-model="body"/>
     {{body}}
   </div>
-
 
 
 //Ребенок
@@ -37,13 +35,13 @@ describe('AppFormInput', () => {
 
 А)
   it('sets the initial model value', () => {
-    let wrapper = mount(AppFormInput, {       //маунтим ребенка, ставя заглушку на props.
+    let wrapper = mount(AppFormInput, {       //маунтим ребенка, ставя заглушку на его props.
       propsData: {
         modelValue: 'cats'
       }
     })
 
-   //считываем значение импута, который получен им из пропса
+   //считываем значение импута, который получен инпутом ИЗ ПРОПСА
     expect(wrapper.find('input').element.value).toEqual('cats') 
   })
 
@@ -54,14 +52,16 @@ describe('AppFormInput', () => {
     let wrapper = mount(AppFormInput)
     let input = wrapper.find('input')  //маунтим ребенка, пропс не перетираем, он будет по-умолчанию (undefined).
 
-    input.element.value = 'cats'  //забиваем в инпут текст
+    input.element.value = 'cats'  //забиваем в инпут текст 'cats'
     input.trigger('input')     //для value инпута присуждается вбитое значение и запускаем луч одновременно.
-
+   (?? см. пример В.)
     expect(wrapper.emitted().input).toBeTruthy()    //луч 'input'- посылается.
     expect(wrapper.emitted().input[0][0]).toEqual('cats')  //считываем значение луча и сравниваем его с 'cats'.
   })
 })
 
 
+
+В) См. раздел "$nextTick()"
 
 

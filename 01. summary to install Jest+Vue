@@ -122,8 +122,6 @@ https://jestjs.io/docs/en/getting-started
 
 
 
-
-
 # добавляем поддержку для спрей-оператора (важно для тестирования ...mapActions({})(!))
 npm i babel-plugin-transform-object-rest-spread -D
 
@@ -140,7 +138,6 @@ module.exports = {
     "transform-object-rest-spread"
   ]
 }
-
 
 
 
@@ -237,7 +234,7 @@ https://babeljs.io/docs/en/6.26.3/babel-plugin-transform-runtime
 
 
 #КАК РЕЗЮМЕ
-где-либо, хотябы в package.json.js дб прописано следующее
+где-либо, хотябы в package.json.js, дб прописано следующее
 
   "jest": {
     "moduleFileExtensions": [
