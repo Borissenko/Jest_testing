@@ -53,7 +53,7 @@ const router = new VueRouter({
 
 
 По-умолчанию значения wrapper.vm.$route будут "нулевыми", только  path: '/':
-console.log('wrapper.vm.$route', wrapper.vm.$route)
+console.log('wrapper.vm.$route ===', wrapper.vm.$route)
 
   console.log
     wrapper.vm.$route {
